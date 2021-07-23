@@ -1,14 +1,17 @@
 package com.singy.community.controller;
 
 import com.singy.community.service.AlphaService;
+import com.singy.community.util.CommunityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
@@ -48,7 +51,7 @@ public class AlphaController {
         // 返回响应数据
         response.setContentType("text/html;charset=utf-8"); // 设置Content-Type响应头：服务器传达给客户端的本次响应体数据格式以及编码格式信息
         try ( // java7新特性：将对象的创建定义在try后面的括号中，编译的时候会自动加一个finally代码块，将对象的close()定义在此代码块中
-                PrintWriter writer = response.getWriter() // 获取字符输出流：用于设置响应体
+              PrintWriter writer = response.getWriter() // 获取字符输出流：用于设置响应体
         ) {
             writer.write("<h1>singy community</h1>");
         } catch (IOException e) {
@@ -134,5 +137,55 @@ public class AlphaController {
         emp.put("salary", 135000.0);
         list.add(emp);
         return list;
+    }
+
+    // Cookie 示例
+    @RequestMapping(path = "/cookie/set", method = RequestMethod.GET)
+    @ResponseBody
+    public String setCookie(HttpServletResponse response) {
+        // 创建 Cookie
+        Cookie cookie = new Cookie("code", CommunityUtil.generateUUID());
+        /**
+         * 设置 Cookie 的生效范围
+         * （浏览器保存Cookie后访问服务器会将Cookie再次发送给服务器，需要指定在哪些请
+         * 求路径下将此Cookie传入请求参数中，若不指定则每次请求都会发送Cookie至服务器）
+         * Cookie 即用来解决HTTP的无状态性质：在同一个连接中，两个执行成功的请求之间是没有关系的，
+         * 使用Cookies添加到头部Header，创建一个会话使每次请求都能共享相同的上下文信息，达成相同的状态
+         */
+        cookie.setPath("/community/alpha");
+        // 设置 Cookie 的生存时间
+        cookie.setMaxAge(60 * 10); // 10分钟
+        // 发送 Cookie
+        response.addCookie(cookie);
+
+        return "set cookie";
+    }
+
+    /**
+     * 使用Request对象获取Cookie，但是获取的为一Cookie数组，需要遍历数组寻找特定的Cookie
+     * 可以使用 CookieValue 注解获取key为特定值的Cookie
+     */
+    @RequestMapping(path = "/cookie/get", method = RequestMethod.GET)
+    @ResponseBody
+    public String getCookie(@CookieValue("code") String code) {
+        System.out.println(code);
+        return "get cookie";
+    }
+
+    // Session 示例
+    @RequestMapping(path = "/session/set", method = RequestMethod.GET)
+    @ResponseBody
+    public String setSession(HttpSession session) {
+        session.setAttribute("id", 1);
+        session.setAttribute("name", "test");
+        return "set session";
+    }
+
+    @RequestMapping(path = "/session/get", method = RequestMethod.GET)
+    @ResponseBody
+    public String getSession(HttpSession session) {
+        System.out.println(session.getAttribute("id"));
+        System.out.println(session.getAttribute("name"));
+        return "get session";
     }
 }

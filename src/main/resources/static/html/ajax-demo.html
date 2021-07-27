@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ajax</title>
+</head>
+<body>
+    <!-- http://localhost:8080/community/html/ajax-demo.html -->
+    <p>
+        <input type="button" value="发送" onclick="send();">
+    </p>
+
+    <script>
+        function send() {
+            /**
+             * $.post(url, [data], [callback], [type])
+             * 参数：
+             *      url：请求路径
+             *      data：请求参数
+             *      callback：回调函数
+             *      type：响应结果的类型
+             */
+            $.post(
+                "/community/alpha/ajax",
+                {"name":"张三","age":23},
+                function(data) {
+                    console.log(typeof(data)); // 向控制台输出数据：在页面使用F12打开Console栏
+                    console.log(data);
+
+                    data = $.parseJSON(data); // 将JSON转为JQuery对象
+                    console.log(typeof(data));
+
+                    console.log(data.code);
+                    console.log(data.msg);
+                }
+            );
+        }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+</body>
+</html>

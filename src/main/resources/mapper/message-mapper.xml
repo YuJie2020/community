@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.singy.community.dao.MessageMapper">
+    <sql id="selectFields">
+        id, from_id, to_id, conversation_id, content, status, create_time
+    </sql>
+
+    <!--
+        子查询为：查询所有会话的最新一条私信的id
+        外部查询为：分页查询所有会话的最新一条私信且按照时间排序
+        PS：id值越大，代表私信的创建时间越晚（id值为自增主键）
+            状态值为2代表私信已删除
+            发送用户id为1代表系统通知
+            发送用户或者接收用户包含当前用户都算作当前用户参与的会话
+            conversation_id相同代表相同的会话
+     -->
+    <select id="selectConversations" resultType="Message">
+        SELECT <include refid="selectFields"></include>
+        FROM message
+        WHERE id IN (
+            SELECT max(id) FROM message
+            WHERE status != 2
+            AND from_id != 1
+            AND (from_id = #{userId} OR to_id = #{userId})
+            GROUP BY conversation_id
+        )
+        ORDER BY id DESC
+        limit #{offset}, #{limit}
+    </select>
+
+    <!-- 起别名以便于外部查询调用子查询中的表/字段名称 -->
+    <select id="selectConversationCount" resultType="int">
+        SELECT COUNT(m.maxid) FROM (
+            SELECT max(id) AS maxid FROM message
+            WHERE status != 2
+            AND from_id != 1
+            AND (from_id = #{userId} OR to_id = #{userId})
+            GROUP BY conversation_id
+        ) AS m
+    </select>
+
+    <select id="selectLetters" resultType="Message">
+        SELECT <include refid="selectFields"></include>
+        FROM message
+        WHERE status != 2
+        AND from_id != 1
+        AND conversation_id = #{conversationId}
+        ORDER BY id DESC
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="selectLetterCount" resultType="int">
+        SELECT COUNT(id) FROM message
+        WHERE status != 2
+        AND from_id != 1
+        AND conversation_id = #{conversationId}
+    </select>
+
+    <select id="selectLetterUnreadCount" resultType="int">
+        SELECT COUNT(id) FROM message
+        WHERE status = 0
+        AND from_id != 1
+        AND to_id = #{userId}
+        <if test="conversationId != null">
+            AND conversation_id = #{conversationId}
+        </if>
+    </select>
+</mapper>

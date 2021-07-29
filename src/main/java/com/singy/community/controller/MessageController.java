@@ -5,6 +5,7 @@ import com.singy.community.entity.Page;
 import com.singy.community.entity.User;
 import com.singy.community.service.MessageService;
 import com.singy.community.service.UserService;
+import com.singy.community.util.CommunityUtil;
 import com.singy.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -12,11 +13,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 public class MessageController {
@@ -32,6 +31,7 @@ public class MessageController {
 
     @RequestMapping(path = "/letter/list", method = RequestMethod.GET)
     public String getLetterList(Model model, Page page) {
+//        Integer.valueOf("abc"); // 人为制造错误
         User user = hostHolder.getUser(); // 当前（登录）用户
         // 分页信息
         page.setLimit(5);
@@ -91,6 +91,12 @@ public class MessageController {
         // 会话的目标用户
         model.addAttribute("target", getLetterTarget(conversationId));
 
+        // 将当前页面未读私信设置为已读
+        List<Integer> ids = getLetterIds(letterList);
+        if (!ids.isEmpty()) {
+            messageService.readMessage(ids);
+        }
+
         return "/site/letter-detail";
     }
 
@@ -104,5 +110,44 @@ public class MessageController {
         } else {
             return userService.findUserById(id0);
         }
+    }
+
+    // 获取私信列表中未读的消息
+    private List<Integer> getLetterIds(List<Message> letterList) {
+        List<Integer> ids = new ArrayList<>();
+
+        if (letterList != null) {
+            for (Message message : letterList) {
+                if (hostHolder.getUser().getId() == message.getToId() && message.getStatus() == 0) {
+                    ids.add(message.getId()); // 当前用户为私信的接收者且私信的状态为未读
+                }
+            }
+        }
+
+        return ids;
+    }
+
+    @RequestMapping(path = "/letter/send", method = RequestMethod.POST)
+    @ResponseBody
+    public String sendLetter(String toUsername, String content) {
+//        Integer.valueOf("abc"); // 人为制造错误
+        User target = userService.findUserByName(toUsername);
+        if (target == null) {
+            return CommunityUtil.getJSONString(1, "目标用户不存在！");
+        }
+
+        Message message = new Message();
+        message.setFromId(hostHolder.getUser().getId());
+        message.setToId(target.getId());
+        if (message.getFromId() < message.getToId()) {
+            message.setConversationId(message.getFromId() + "_" + message.getToId());
+        } else {
+            message.setConversationId(message.getToId() + "_" + message.getFromId());
+        }
+        message.setContent(content);
+        message.setCreateTime(new Date());
+        messageService.addMessage(message);
+
+        return CommunityUtil.getJSONString(0);
     }
 }

@@ -24,4 +24,20 @@ public class RedisKeyUtil {
     public static String getUserLikeKey(int userId) {
         return PREFIX_USER_LIKE + SPLIT + userId;
     }
+
+    /**
+     * 某给用户关注的实体 key -> value（使用redis中的zset存储用户关注的实体id及关注时间）
+     * followee:userId:entityType -> zset(entityId, time)
+     */
+    public static String getFolloweeKey(int userId, int entityType) {
+        return PREFIX_FOLLOWEE + SPLIT + userId + SPLIT + entityType;
+    }
+
+    /**
+     * 某个实体拥有的粉丝 key -> value（使用redis中的zset存储实体粉丝的用户id及关注时间）
+     * follower:entityType:entityId -> zset(userId, time)
+     */
+    public static String getFollowerKey(int entityType, int entityId) {
+        return PREFIX_FOLLOWER + SPLIT + entityType + SPLIT + entityId;
+    }
 }

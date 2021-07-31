@@ -6,7 +6,7 @@ package com.singy.community.entity;
 public class Page {
 
     // 页面（客户端）传给服务器的
-    private int current = 1; // 当前页码（默认值为 1）
+    private int current = 1; // 当前页码（默认值为 1：即当点击功能按钮时不会传入current参数，但是又需要封装Page对象，默认查询首页）
     private int limit = 10; // 显示上限（默认值为 10）
 
     // 服务器设置好返回给页面（客户端）的

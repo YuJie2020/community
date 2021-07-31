@@ -2,8 +2,10 @@ package com.singy.community.controller;
 
 import com.singy.community.annotation.LoginRequired;
 import com.singy.community.entity.User;
+import com.singy.community.service.FollowService;
 import com.singy.community.service.LikeService;
 import com.singy.community.service.UserService;
+import com.singy.community.util.CommunityConstant;
 import com.singy.community.util.CommunityUtil;
 import com.singy.community.util.HostHolder;
 import org.apache.commons.lang3.StringUtils;
@@ -27,7 +29,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/user")
-public class UserController {
+public class UserController implements CommunityConstant {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -48,6 +50,9 @@ public class UserController {
 
     @Autowired
     private LikeService likeService;
+
+    @Autowired
+    private FollowService followService;
 
     @LoginRequired
     @RequestMapping(path = "/setting", method = RequestMethod.GET)
@@ -147,9 +152,28 @@ public class UserController {
         if (user == null) {
             throw new RuntimeException("该用户不存在！");
         }
+
+        // 用户
         model.addAttribute("user", user);
-        int likeCount = likeService.findUserLikeCount(userId); // 用户获得的点赞数
+
+        // 用户获得的点赞数
+        int likeCount = likeService.findUserLikeCount(userId);
         model.addAttribute("likeCount", likeCount);
+
+        // 用户的关注数量
+        long followeeCount = followService.findFolloweeCount(userId, ENTITY_TYPE_USER);
+        model.addAttribute("followeeCount", followeeCount);
+
+        // 用户的粉丝数量
+        long followerCount = followService.findFollowerCount(ENTITY_TYPE_USER, userId);
+        model.addAttribute("followerCount", followerCount);
+
+        // 当前用户是否已关注此用户
+        boolean hasFollowed = false; // 默认为false（若不存在登录用户则显示为未关注状态）
+        if (hostHolder.getUser() != null) { // 存在登录用户
+            hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(), ENTITY_TYPE_USER, userId);
+        }
+        model.addAttribute("hasFollowed", hasFollowed);
 
         return "/site/profile";
     }

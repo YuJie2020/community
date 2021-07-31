@@ -38,17 +38,17 @@ public class AlphaService {
     private TransactionTemplate transactionTemplate;
 
     public AlphaService() {
-        System.out.println("实例化AlphaService");
+//        System.out.println("实例化AlphaService");
     }
 
     @PostConstruct // 指定初始化方法：在构造器之后调用
     public void init() {
-        System.out.println("初始化AlphaService");
+//        System.out.println("初始化AlphaService");
     }
 
     @PreDestroy // 指定销毁方法：在销毁对象之前调用
     public void destroy() {
-        System.out.println("销毁AlphaService");
+//        System.out.println("销毁AlphaService");
     }
 
     public String find() {

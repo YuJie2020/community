@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -123,6 +124,7 @@ public class MapperTests {
         System.out.println(discussPost.getId());
     }
 
+    // 私信：
     @Test
     public void testMessageMapper() {
         List<Message> list = messageMapper.selectConversations(111, 0, 20);
@@ -146,5 +148,27 @@ public class MapperTests {
 
         count = messageMapper.selectLetterUnreadCount(131, null);
         System.out.println(count);
+    }
+
+    // 系统通知：
+    @Test
+    public void testMessageMapper2() {
+//        Message message = messageMapper.selectLatestNotice(111, "like");
+//        System.out.println(message);
+//        System.out.println(HtmlUtils.htmlUnescape(message.getContent())); // 对HTML标签进行反转义
+//
+//        int count = messageMapper.selectNoticeCount(111, "like");
+//        System.out.println(count);
+//
+//        count = messageMapper.selectNoticeUnreadCount(111, "like");
+//        System.out.println(count);
+//
+//        count = messageMapper.selectNoticeUnreadCount(111, null);
+//        System.out.println(count);
+
+        List<Message> notices = messageMapper.selectNotices(111, "comment", 0, 5);
+        for (Message notice : notices) {
+            System.out.println(notice);
+        }
     }
 }

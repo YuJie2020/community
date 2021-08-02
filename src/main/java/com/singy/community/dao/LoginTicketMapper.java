@@ -4,6 +4,7 @@ import com.singy.community.entity.LoginTicket;
 import org.apache.ibatis.annotations.*;
 
 @Mapper
+@Deprecated // 表示此类或方法...已废弃、暂时可用，但以后此类或方法...都不会再更新，后期可能会删除：不推荐使用
 public interface LoginTicketMapper {
 
     @Insert({

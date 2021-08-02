@@ -1,7 +1,9 @@
 package com.singy.community.controller;
 
+import com.singy.community.entity.Event;
 import com.singy.community.entity.Page;
 import com.singy.community.entity.User;
+import com.singy.community.event.EventProducer;
 import com.singy.community.service.FollowService;
 import com.singy.community.service.UserService;
 import com.singy.community.util.CommunityConstant;
@@ -30,6 +32,9 @@ public class FollowController implements CommunityConstant {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private EventProducer eventProducer;
+
     // 异步请求，不刷新页面，只更新局部数据（关注）
     @RequestMapping(path = "/follow", method = RequestMethod.POST)
     @ResponseBody
@@ -37,6 +42,16 @@ public class FollowController implements CommunityConstant {
         User user = hostHolder.getUser();
         if (user != null) {
             followService.follow(user.getId(), entityType, entityId);
+
+            // 触发关注事件
+            Event event = new Event()
+                    .setTopic(TOPIC_FOLLOW)
+                    .setUserId(hostHolder.getUser().getId())
+                    .setEntityType(entityType)
+                    .setEntityId(entityId)
+                    .setEntityUserId(entityId);
+            eventProducer.fireEvent(event);
+
             return CommunityUtil.getJSONString(0, "关注成功！");
         } else {
             return CommunityUtil.getJSONString(1, "请您先登录！");

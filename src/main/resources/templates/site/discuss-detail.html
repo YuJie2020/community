@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<link rel="icon" href="https://static.nowcoder.com/images/logo_87_87.png"/>
+	<link rel="icon" href="https://yujie2020.github.io/images/2021-06-29-project/icon.ico"/>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">
 	<link rel="stylesheet" th:href="@{/css/global.css}" />
 	<link rel="stylesheet" th:href="@{/css/discuss-detail.css}" />
@@ -21,7 +21,7 @@
 				<!-- 标题 -->
 				<h6 class="mb-4">
 					<img src="http://static.nowcoder.com/images/img/icons/ico-discuss.png"/>
-					<span th:utext="${post.title}">备战春招，面试刷题跟他复习，一个月全搞定！</span>
+					<span th:utext="${post.title}">面试刷题跟他复习，一个月全搞定！</span>
 					<div class="float-right">
 						<button type="button" class="btn btn-danger btn-sm">置顶</button>
 						<button type="button" class="btn btn-danger btn-sm">加精</button>
@@ -39,7 +39,7 @@
 							发布于 <b th:text="${#dates.format(post.createTime, 'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</b>
 							<ul class="d-inline float-right">
 								<li class="d-inline ml-2">
-									<a href="javascript:;" th:onclick="|like(this,1,${post.id},${post.userId});|" class="text-primary">
+									<a href="javascript:;" th:onclick="|like(this,1,${post.id},${post.userId},${post.id});|" class="text-primary">
 										<b th:text="${likeStatus==1 ? '已赞' : '赞'}">赞</b> <i th:text="${likeCount==0 ? '' : likeCount}">11</i>
 									</a>
 								</li>
@@ -51,12 +51,8 @@
 				</div>	
 				<!-- 正文 -->
 				<div class="mt-4 mb-3 content" th:utext="${post.content}">
-					金三银四的金三已经到了，你还沉浸在过年的喜悦中吗？
-					如果是，那我要让你清醒一下了：目前大部分公司已经开启了内推，正式网申也将在3月份陆续开始，金三银四，春招的求职黄金时期已经来啦！！！
-					再不准备，作为19应届生的你可能就找不到工作了。。。作为20届实习生的你可能就找不到实习了。。。
-					现阶段时间紧，任务重，能做到短时间内快速提升的也就只有算法了，
-					那么算法要怎么复习？重点在哪里？常见笔试面试算法题型和解题思路以及最优代码是怎样的？
-					跟左程云老师学算法，不仅能解决以上所有问题，还能在短时间内得到最大程度的提升！！！
+					已经到了，你还沉浸在喜悦中吗？
+					如果是！！！
 				</div>
 			</div>
 			<!-- 回帖 -->
@@ -90,7 +86,7 @@
 								<span>发布于 <b th:text="${#dates.format(commentVO.comment.createTime, 'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</b></span>
 								<ul class="d-inline float-right">
 									<li class="d-inline ml-2">
-										<a href="javascript:;" th:onclick="|like(this,2,${commentVO.comment.id},${commentVO.comment.userId});|" class="text-primary">
+										<a href="javascript:;" th:onclick="|like(this,2,${commentVO.comment.id},${commentVO.comment.userId},${post.id});|" class="text-primary">
 											<b th:text="${commentVO.likeStatus==1 ? '已赞' : '赞'}">赞</b>(<i th:text="${commentVO.likeCount==0 ? '' : commentVO.likeCount}">1</i>)
 										</a>
 									</li>
@@ -116,7 +112,7 @@
 										<span th:text="${#dates.format(replyVO.reply.createTime, 'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</span>
 										<ul class="d-inline float-right">
 											<li class="d-inline ml-2">
-												<a href="javascript:;" th:onclick="|like(this,2,${replyVO.reply.id},${replyVO.reply.userId})|" class="text-primary">
+												<a href="javascript:;" th:onclick="|like(this,2,${replyVO.reply.id},${replyVO.reply.userId},${post.id});|" class="text-primary">
 													<b th:text="${replyVO.likeStatus==1 ? '已赞' : '赞'}">赞</b>(<i th:text="${replyVO.likeCount==0 ? '' : replyVO.likeCount}">1</i>)
 												</a>
 											</li>

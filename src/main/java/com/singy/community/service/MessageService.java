@@ -18,6 +18,8 @@ public class MessageService {
     @Autowired
     private SensitiveFilter sensitiveFilter;
 
+    // 私信：
+
     public List<Message> findConversations(int userId, int offset, int limit) {
         return messageMapper.selectConversations(userId, offset, limit);
     }
@@ -46,5 +48,23 @@ public class MessageService {
 
     public int readMessage(List<Integer> ids) {
         return messageMapper.updateStatus(ids, 1); // 0：未读，1：已读，2：删除
+    }
+
+    // 系统通知：
+
+    public Message findLatestNotice(int userId, String topic) {
+        return messageMapper.selectLatestNotice(userId, topic);
+    }
+
+    public int findNoticeCount(int userId, String topic) {
+        return messageMapper.selectNoticeCount(userId, topic);
+    }
+
+    public int findNoticeUnreadCount(int userId, String topic) {
+        return messageMapper.selectNoticeUnreadCount(userId, topic);
+    }
+
+    public List<Message> findNotices(int userId, String topic, int offset, int limit) {
+        return messageMapper.selectNotices(userId, topic, offset, limit);
     }
 }

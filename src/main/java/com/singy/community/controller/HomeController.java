@@ -31,7 +31,7 @@ public class HomeController implements CommunityConstant {
     private LikeService likeService;
 
     @RequestMapping(path = "/index", method = RequestMethod.GET)
-    public String getIndexPage(Model model, Page page) { // page对象不为普通参数（基本类型和String）即为一实体，SpringMVC会自动将其添加到Model（数据模型）中，但是对于普通参数则不会
+    public String getIndexPage(Model model, Page page) { // 请求参数，SpringMVC会自动将其添加到Model（数据模型）中
         page.setRows(discussPostService.findDiscussPostRows(0));
         page.setPath("/index");
 

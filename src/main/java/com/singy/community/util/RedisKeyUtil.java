@@ -11,6 +11,9 @@ public class RedisKeyUtil {
     private static final String PREFIX_KAPTCHA = "kaptcha";
     private static final String PREFIX_LOGINTICKET = "ticket";
     private static final String PREFIX_USER = "user";
+    private static final String PREFIX_UV = "uv";
+    private static final String PREFIX_DAU = "dau";
+    private static final String PREFIX_POST = "post";
 
     /**
      * 某个实体的赞 key -> value（使用redis中的set集合存储点赞用户的id）
@@ -71,5 +74,45 @@ public class RedisKeyUtil {
      */
     public static String getUserKey(int userId) {
         return PREFIX_USER + SPLIT + userId;
+    }
+
+    /**
+     * 某天的独立访客（UV）key -> value（使用redis中的HyperLogLog存储访客IP地址）
+     * uv:date -> HyperLogLog(访客IP地址)
+     */
+    public static String getUVKey(String date) {
+        return PREFIX_UV + SPLIT + date;
+    }
+
+    /**
+     * 某几天（区间）的独立访客（UV）key -> value（使用redis中的HyperLogLog存储访客IP地址）
+     * uv:startDate:endDate -> HyperLogLog(访客IP地址)
+     */
+    public static String getUVKey(String startDate, String endDate) {
+        return PREFIX_UV + SPLIT + startDate + SPLIT + endDate;
+    }
+
+    /**
+     * 某天的活跃用户（DAU）key -> value（使用redis中的string按位存储id为索引index的用户今日是否活跃：0/1）
+     * dau:date -> string(id为索引index的用户今日是否活跃：0/1)
+     */
+    public static String getDAUKey(String date) {
+        return PREFIX_DAU + SPLIT + date;
+    }
+
+    /**
+     * 某几天（区间）的活跃用户（DAU）key -> value（使用redis中的string按位存储id为索引index的用户这段时间是否活跃：0/1，即这段时间有一天活跃就算做这段时间活跃）
+     * dau:startDate:endDate -> string(id为索引index的用户这段时间是否活跃：0/1)
+     */
+    public static String getDAUKey(String startDate, String endDate) {
+        return PREFIX_DAU + SPLIT + startDate + SPLIT + endDate;
+    }
+
+    /**
+     * 需要更新分数的帖子 key -> value（使用redis中的set集合存储需要更新分数的帖子id）
+     * post:score -> set(discussPostId)
+     */
+    public static String getPostScoreKey() {
+        return PREFIX_POST + SPLIT + "score";
     }
 }

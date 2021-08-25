@@ -8,7 +8,9 @@ import com.singy.community.service.CommentService;
 import com.singy.community.service.DiscussPostService;
 import com.singy.community.util.CommunityConstant;
 import com.singy.community.util.HostHolder;
+import com.singy.community.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +33,9 @@ public class CommentController implements CommunityConstant {
 
     @Autowired
     private DiscussPostService discussPostService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @RequestMapping(path = "/add/{discussPostId}", method = RequestMethod.POST)
     public String addComment(@PathVariable("discussPostId") int discussPostId, Comment comment) {
@@ -59,6 +64,21 @@ public class CommentController implements CommunityConstant {
             event.setEntityUserId(target.getUserId());
         }
         eventProducer.fireEvent(event);
+
+        // 触发发帖事件（评论帖子需要更新帖子的评论数量，需要更改Elasticsearch中保存的索引中的文档：即再次保存）
+        if (comment.getEntityType() == ENTITY_TYPE_POST) {
+            DiscussPost target = discussPostService.findDiscussPostById(comment.getEntityId());
+            event = new Event()
+                    .setTopic(TOPIC_PUBLISH)
+                    .setUserId(target.getUserId())
+                    .setEntityType(ENTITY_TYPE_POST)
+                    .setEntityId(discussPostId);
+            eventProducer.fireEvent(event);
+
+            // 计算帖子分数
+            String redisKey = RedisKeyUtil.getPostScoreKey();
+            redisTemplate.opsForSet().add(redisKey, discussPostId);
+        }
 
         return "redirect:/discuss/detail/" + discussPostId; // 重定向的方式使添加后的评论可以显示在页面上
     }

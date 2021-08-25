@@ -6,8 +6,12 @@ import com.singy.community.dao.UserMapper;
 import com.singy.community.entity.DiscussPost;
 import com.singy.community.entity.User;
 import com.singy.community.util.CommunityUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -24,6 +28,8 @@ import java.util.Date;
 @Service
 //@Scope("prototype") // 指定 bean 的作用范围：singleton prototype ...
 public class AlphaService {
+
+    private static final Logger logger = LoggerFactory.getLogger(AlphaService.class);
 
     @Autowired
     private AlphaDao alphaDao;
@@ -127,5 +133,16 @@ public class AlphaService {
                 return "ok";
             }
         });
+    }
+
+    @Async // 使普通方法可以在多线程环境下被异步的调用
+    public void execute() {
+        logger.debug("execute");
+    }
+
+    // 定时任务：不需要主动去调用，自动执行
+//    @Scheduled(initialDelay = 10000, fixedRate = 1000)
+    public void execute2() {
+        logger.debug("execute2");
     }
 }

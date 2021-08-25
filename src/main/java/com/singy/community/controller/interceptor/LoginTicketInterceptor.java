@@ -6,6 +6,10 @@ import com.singy.community.service.UserService;
 import com.singy.community.util.CookieUtil;
 import com.singy.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -37,6 +41,13 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
                 User user = userService.findUserById(loginTicket.getUserId());
                 // 在本次请求中持有用户（一次请求响应过程中绑定一个线程，使用ThreadLocal存储用户信息）
                 hostHolder.setUser(user);
+                /**
+                 * Spring Security 认证：构建用户认证的结果，并存入SecurityContext，用于Security进行授权
+                 * principal：主要信息；credentials：证书；authorities：权限
+                 */
+                Authentication authentication = new UsernamePasswordAuthenticationToken(
+                        user, user.getPassword(), userService.getAuthorities(user.getId()));
+                SecurityContextHolder.setContext(new SecurityContextImpl(authentication));
             }
         }
 
@@ -54,5 +65,9 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         hostHolder.clear();
+        /**
+         * 清理 Spring Security 认证
+         */
+        SecurityContextHolder.clearContext();
     }
 }

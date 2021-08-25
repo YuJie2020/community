@@ -7,7 +7,9 @@ import com.singy.community.service.LikeService;
 import com.singy.community.util.CommunityConstant;
 import com.singy.community.util.CommunityUtil;
 import com.singy.community.util.HostHolder;
+import com.singy.community.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,6 +29,9 @@ public class LikeController implements CommunityConstant {
 
     @Autowired
     private EventProducer eventProducer;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     // 异步请求，不刷新页面，只更新局部数据（点赞与否与数量）
     @RequestMapping(path = "/like", method = RequestMethod.POST)
@@ -51,6 +56,12 @@ public class LikeController implements CommunityConstant {
                         .setEntityUserId(entityUserId)
                         .setData("postId", postId);
                 eventProducer.fireEvent(event);
+            }
+
+            if (entityType == ENTITY_TYPE_POST) { // 对帖子进行点赞/取消赞
+                // 计算帖子分数
+                String redisKey = RedisKeyUtil.getPostScoreKey();
+                redisTemplate.opsForSet().add(redisKey, postId);
             }
 
             return CommunityUtil.getJSONString(0, null, map);
